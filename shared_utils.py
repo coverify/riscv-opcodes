@@ -167,7 +167,7 @@ InstrDict = Dict[str, SingleInstr]
 
 
 # Processing main function for a line in the encoding file
-def process_enc_line(line: str, ext: str) -> "tuple[str, SingleInstr]":
+def process_enc_line(line: str, ext: str, orig_inst: bool = False) -> "tuple[str, SingleInstr]":
     """
     This function processes each line of the encoding files (rv*). As part of
     the processing, the function ensures that the encoding is legal through the
@@ -213,13 +213,23 @@ def process_enc_line(line: str, ext: str) -> "tuple[str, SingleInstr]":
     check_arg_lut(args, encoding_args, name)
 
     # Return single_dict
-    return name, {
-        "encoding": "".join(encoding),
-        "variable_fields": args,
-        "extension": [os.path.basename(ext)],
-        "match": match,
-        "mask": mask,
-    }
+    if (orig_inst):
+        return name, {
+            "encoding": "".join(encoding),
+            "variable_fields": args,
+            "extension": [os.path.basename(ext)],
+            "match": match,
+            "mask": mask,
+            "orig_inst": orig_inst,
+        }
+    else:
+        return name, {
+            "encoding": "".join(encoding),
+            "variable_fields": args,
+            "extension": [os.path.basename(ext)],
+            "match": match,
+            "mask": mask,
+        }
 
 
 # Extract ISA Type
@@ -460,7 +470,7 @@ def process_pseudo_instructions(
 
         validate_instruction_in_extension(orig_inst, ext_file, file_name, pseudo_inst)
 
-        name, single_dict = process_enc_line(f"{pseudo_inst} {line_content}", file_name)
+        name, single_dict = process_enc_line(f"{pseudo_inst} {line_content}", file_name, orig_inst.replace('.', '_'))
         if (
             orig_inst.replace(".", "_") not in instr_dict
             or include_pseudo
